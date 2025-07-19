@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  StatusBar,
   Dimensions,
   ActivityIndicator,
   RefreshControl,
@@ -15,6 +14,7 @@ import {
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import CustomHeader from '../../utils/CustomHeader'; // Adjust path as needed
 
 const { width } = Dimensions.get('window');
 
@@ -87,7 +87,6 @@ export default class HomeScreen extends Component {
   };
 
   openArticle = (article) => {
-    // Navigate to ArticleDetailScreen and pass the article data as params
     this.props.navigation.navigate('ArticleDetail', { article });
   };
 
@@ -178,21 +177,10 @@ export default class HomeScreen extends Component {
     if (error) {
       return (
         <SafeAreaView style={styles.container}>
-          <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-          {/* Header with drawer button */}
-          <View style={styles.headerWithDrawer}>
-            <TouchableOpacity
-              style={styles.drawerButton}
-              onPress={() => this.props.navigation.openDrawer()}
-            >
-              <Ionicons name="menu" size={28} color="#1c1c1e" />
-            </TouchableOpacity>
-            <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>Latest News</Text>
-              <Text style={styles.headerSubtitle}>Stay updated with the latest</Text>
-            </View>
-          </View>
-          
+          <CustomHeader 
+            title="Latest News" 
+            subtitle="Stay updated with the latest" 
+          />
           <View style={styles.errorContainer}>
             <Ionicons name="alert-circle-outline" size={60} color="#ff6b6b" />
             <Text style={styles.errorText}>Failed to load news</Text>
@@ -209,21 +197,15 @@ export default class HomeScreen extends Component {
 
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        
-        {/* Header with drawer button */}
-        <View style={styles.headerWithDrawer}>
-          <TouchableOpacity
-            style={styles.drawerButton}
-            onPress={() => this.props.navigation.openDrawer()}
-          >
-            <Ionicons name="menu" size={28} color="#1c1c1e" />
-          </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Latest News</Text>
-            <Text style={styles.headerSubtitle}>Stay updated with the latest</Text>
-          </View>
-        </View>
+        <CustomHeader 
+          title="Latest News" 
+          subtitle="Stay updated with the latest"
+          rightComponent={
+            <TouchableOpacity style={styles.searchButton}>
+              <Ionicons name="search-outline" size={24} color="#1c1c1e" />
+            </TouchableOpacity>
+          }
+        />
 
         {isLoading ? (
           <View style={styles.loadingContainer}>
@@ -283,37 +265,9 @@ const styles = {
     flex: 1,
     backgroundColor: '#fff',
   },
-  // Updated header styles with drawer button
-  headerWithDrawer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  drawerButton: {
+  searchButton: {
     padding: 8,
-    marginRight: 15,
-    marginTop: 2,
-  },
-  headerContent: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1c1c1e',
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#8e8e93',
-    marginTop: 2,
+    borderRadius: 8,
   },
   scrollView: {
     flex: 1,
@@ -360,6 +314,7 @@ const styles = {
     color: '#1c1c1e',
     paddingHorizontal: 20,
     marginBottom: 15,
+    marginTop: 10,
   },
   carouselContainer: {
     paddingHorizontal: 20,

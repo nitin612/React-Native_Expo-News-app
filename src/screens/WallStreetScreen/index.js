@@ -279,6 +279,13 @@ export default class HomeScreen extends Component {
     this.setState({ showDetail: false, selectedArticle: null });
   };
 
+  // Function to open drawer - you'll need to pass navigation prop from parent
+  openDrawer = () => {
+    if (this.props.navigation) {
+      this.props.navigation.openDrawer();
+    }
+  };
+
   renderCarouselItem = ({ item, index }) => {
     return (
       <TouchableOpacity
@@ -394,9 +401,20 @@ export default class HomeScreen extends Component {
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         
+        {/* Updated Header with Left-aligned text and Right-aligned Drawer Button */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Crypto News</Text>
-          <Text style={styles.headerSubtitle}>Stay updated with the latest</Text>
+          <View style={styles.headerContent}>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.headerTitle}>WallStreet News</Text>
+              <Text style={styles.headerSubtitle}>Stay updated with the latest</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.drawerButton} 
+              onPress={this.openDrawer}
+            >
+              <Ionicons name="menu-outline" size={28} color="#1c1c1e" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {isLoading ? (
@@ -462,6 +480,14 @@ const styles = {
     paddingTop: 10,
     paddingBottom: 20,
   },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center', // Changed from 'flex-start' to 'center' for better alignment
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
   headerTitle: {
     fontSize: 32,
     fontWeight: '700',
@@ -472,6 +498,12 @@ const styles = {
     fontSize: 16,
     color: '#8e8e93',
     marginTop: 2,
+  },
+  drawerButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#f2f2f7',
+    // Removed marginTop since we're now using center alignment
   },
   scrollView: {
     flex: 1,
