@@ -8,12 +8,13 @@ import TechScreen from "./src/screens/TechScreen/index"
 import TeslaScreen from "./src/screens/TeslaScreen/index"
 import WallStreet from "./src/screens/WallStreetScreen/index"
 import HomeScreen from "./src/screens/HomeScreen/index"
+import RootStack from "./src/Routes/Navigation"
 
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <HomeScreen/>
+      <RootStack/>
     </View>
   );
 }
