@@ -1,21 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-
-import CryptoCurrecyScreen from './src/screens/CryptoCurrecyScreen/index';
-import AppleScreen from "./src/screens/AppleScreen/index"
-import BussinessScreen from "./src/screens/BussinessScreen/index"
-import TechScreen from "./src/screens/TechScreen/index"
-import TeslaScreen from "./src/screens/TeslaScreen/index"
-import WallStreet from "./src/screens/WallStreetScreen/index"
-import HomeScreen from "./src/screens/HomeScreen/index"
 import RootStack from "./src/Routes/Navigation"
+import { NavigationContainer } from '@react-navigation/native';
+import DrawerNavigator from './src/drawer/Drawer';
 
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <RootStack/>
-    </View>
+    <NavigationContainer>
+      <DrawerNavigator/>
+    </NavigationContainer>
   );
 }
 
