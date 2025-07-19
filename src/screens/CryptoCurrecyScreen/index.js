@@ -28,7 +28,64 @@ class ArticleDetailScreen extends Component {
     this.state = {
       scrollY: new Animated.Value(0)
     };
+    
+    // Animation values for opening/closing
+    this.slideAnim = new Animated.Value(height);
+    this.opacityAnim = new Animated.Value(0);
+    this.scaleAnim = new Animated.Value(0.9);
   }
+
+  componentDidMount() {
+    // Animate in when component mounts
+    this.animateIn();
+  }
+
+  animateIn = () => {
+    Animated.parallel([
+      Animated.timing(this.slideAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(this.opacityAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(this.scaleAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  animateOut = () => {
+    Animated.parallel([
+      Animated.timing(this.slideAnim, {
+        toValue: height,
+        duration: 350,
+        useNativeDriver: true,
+      }),
+      Animated.timing(this.opacityAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(this.scaleAnim, {
+        toValue: 0.9,
+        duration: 350,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // Call onBack after animation completes
+      this.props.onBack();
+    });
+  };
+
+  handleBack = () => {
+    this.animateOut();
+  };
 
   shareArticle = async () => {
     try {
@@ -55,7 +112,7 @@ class ArticleDetailScreen extends Component {
   };
 
   render() {
-    const { article, onBack } = this.props;
+    const { article } = this.props;
     const { scrollY } = this.state;
 
     const headerOpacity = scrollY.interpolate({
@@ -77,12 +134,21 @@ class ArticleDetailScreen extends Component {
     });
 
     return (
-      <View style={styles.detailContainer}>
+      <Animated.View style={[
+        styles.detailContainer,
+        {
+          transform: [
+            { translateY: this.slideAnim },
+            { scale: this.scaleAnim }
+          ],
+          opacity: this.opacityAnim,
+        }
+      ]}>
         <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
         
         {/* Animated Header */}
         <Animated.View style={[styles.detailHeader, { opacity: headerOpacity }]}>
-          <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <TouchableOpacity style={styles.backButton} onPress={this.handleBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.detailHeaderTitle} numberOfLines={1}>
@@ -125,7 +191,7 @@ class ArticleDetailScreen extends Component {
 
           {/* Floating Action Buttons */}
           <View style={styles.floatingActions}>
-            <TouchableOpacity style={styles.floatingButton} onPress={onBack}>
+            <TouchableOpacity style={styles.floatingButton} onPress={this.handleBack}>
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.floatingButton} onPress={this.shareArticle}>
@@ -195,7 +261,7 @@ class ArticleDetailScreen extends Component {
             </View>
           </View>
         </Animated.ScrollView>
-      </View>
+      </Animated.View>
     );
   }
 }
@@ -272,11 +338,18 @@ export default class HomeScreen extends Component {
   };
 
   openArticle = (article) => {
-    this.setState({ selectedArticle: article, showDetail: true });
+    this.setState({ 
+      selectedArticle: article, 
+      showDetail: true 
+    });
   };
 
   closeArticle = () => {
-    this.setState({ showDetail: false, selectedArticle: null });
+    // This will be called after the close animation completes
+    this.setState({ 
+      showDetail: false, 
+      selectedArticle: null 
+    });
   };
 
   // Function to open drawer - you'll need to pass navigation prop from parent
@@ -370,15 +443,6 @@ export default class HomeScreen extends Component {
   render() {
     const { isLoading, articles, refreshing, error, showDetail, selectedArticle } = this.state;
 
-    if (showDetail && selectedArticle) {
-      return (
-        <ArticleDetailScreen
-          article={selectedArticle}
-          onBack={this.closeArticle}
-        />
-      );
-    }
-
     if (error) {
       return (
         <SafeAreaView style={styles.container}>
@@ -405,7 +469,7 @@ export default class HomeScreen extends Component {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>Crypto News</Text>
+              <Text style={styles.headerTitle}>Cryptocurrency News</Text>
               <Text style={styles.headerSubtitle}>Stay updated with the latest</Text>
             </View>
             <TouchableOpacity 
@@ -465,6 +529,14 @@ export default class HomeScreen extends Component {
             <View style={styles.bottomPadding} />
           </ScrollView>
         )}
+
+        {/* Render Detail Screen as Overlay */}
+        {showDetail && selectedArticle && (
+          <ArticleDetailScreen
+            article={selectedArticle}
+            onBack={this.closeArticle}
+          />
+        )}
       </SafeAreaView>
     );
   }
@@ -483,7 +555,7 @@ const styles = {
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', // Changed from 'flex-start' to 'center' for better alignment
+    alignItems: 'center',
   },
   headerTextContainer: {
     flex: 1,
@@ -503,7 +575,6 @@ const styles = {
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#f2f2f7',
-    // Removed marginTop since we're now using center alignment
   },
   scrollView: {
     flex: 1,
@@ -692,10 +763,15 @@ const styles = {
     height: 30,
   },
 
-  // Detail Screen Styles
+  // Detail Screen Styles - Updated for overlay
   detailContainer: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: '#fff',
+    zIndex: 1000,
   },
   detailHeader: {
     position: 'absolute',
