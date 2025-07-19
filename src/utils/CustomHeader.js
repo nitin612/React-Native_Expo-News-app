@@ -3,19 +3,18 @@ import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-const CustomHeader = ({ 
-  title, 
-  subtitle, 
-  showBackButton = false, 
+const CustomHeader = ({
+  title,
+  subtitle,
+  showBackButton = false,
   rightComponent = null,
   backgroundColor = '#fff',
   titleColor = '#1c1c1e'
 }) => {
   const navigation = useNavigation();
-
+  
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor={backgroundColor} />
       <View style={[styles.headerContainer, { backgroundColor }]}>
         <View style={styles.leftSection}>
           {showBackButton ? (

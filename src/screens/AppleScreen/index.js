@@ -18,8 +18,15 @@ import {
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../utils/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
+
+// Wrapper component to use hooks
+const AppleScreenWrapper = (props) => {
+  const theme = useTheme();
+  return <AppleScreen {...props} theme={theme} />;
+};
 
 // Article Detail Screen Component
 class ArticleDetailScreen extends Component {
@@ -112,7 +119,8 @@ class ArticleDetailScreen extends Component {
   };
 
   render() {
-    const { article } = this.props;
+    const { article, theme } = this.props;
+    const { colors } = theme;
     const { scrollY } = this.state;
 
     const headerOpacity = scrollY.interpolate({
@@ -136,6 +144,7 @@ class ArticleDetailScreen extends Component {
     return (
       <Animated.View style={[
         styles.detailContainer,
+        { backgroundColor: colors.background },
         {
           transform: [
             { translateY: this.slideAnim },
@@ -144,7 +153,7 @@ class ArticleDetailScreen extends Component {
           opacity: this.opacityAnim,
         }
       ]}>
-        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <StatusBar barStyle={colors.statusBar} backgroundColor="transparent" translucent />
         
         {/* Animated Header */}
         <Animated.View style={[styles.detailHeader, { opacity: headerOpacity }]}>
@@ -200,62 +209,62 @@ class ArticleDetailScreen extends Component {
           </View>
 
           {/* Article Content */}
-          <View style={styles.detailContent}>
+          <View style={[styles.detailContent, { backgroundColor: colors.background }]}>
             <View style={styles.detailMeta}>
               <View style={styles.detailSourceContainer}>
-                <Text style={styles.detailSource}>{article.source}</Text>
-                <View style={styles.sourceDivider} />
-                <Text style={styles.detailDate}>
+                <Text style={[styles.detailSource, { color: colors.accent }]}>{article.source}</Text>
+                <View style={[styles.sourceDivider, { backgroundColor: colors.secondary }]} />
+                <Text style={[styles.detailDate, { color: colors.secondary }]}>
                   {this.formatFullDate(article.date)}
                 </Text>
               </View>
               {article.author && (
-                <Text style={styles.detailAuthor}>By {article.author}</Text>
+                <Text style={[styles.detailAuthor, { color: colors.secondary }]}>By {article.author}</Text>
               )}
             </View>
 
-            <Text style={styles.detailTitle}>{article.title}</Text>
+            <Text style={[styles.detailTitle, { color: colors.primary }]}>{article.title}</Text>
             
             {article.description && (
-              <Text style={styles.detailDescription}>{article.description}</Text>
+              <Text style={[styles.detailDescription, { color: colors.secondary }]}>{article.description}</Text>
             )}
 
             {/* Simulated Article Content */}
             <View style={styles.articleBody}>
-              <Text style={styles.bodyText}>
+              <Text style={[styles.bodyText, { color: colors.primary }]}>
                 {article.description || "This is where the full article content would appear. In a real implementation, you would fetch the complete article content from your news API or use a web scraping service to extract the full text."}
               </Text>
               
-              <Text style={styles.bodyText}>
-                The cryptocurrency market continues to evolve rapidly, with new developments and trends emerging daily. Stay informed about the latest changes that could impact your investments and understanding of this dynamic space.
+              <Text style={[styles.bodyText, { color: colors.primary }]}>
+                Apple continues to innovate and evolve, with new developments and trends emerging across their product ecosystem. Stay informed about the latest changes that could impact technology enthusiasts and Apple users worldwide.
               </Text>
 
-              <Text style={styles.bodyText}>
-                Market analysis shows various factors influencing price movements, from regulatory changes to technological advancements and institutional adoption patterns.
+              <Text style={[styles.bodyText, { color: colors.primary }]}>
+                Market analysis shows various factors influencing Apple's position, from new product launches to software updates and market dynamics.
               </Text>
 
               {/* Read Full Article Button */}
               <TouchableOpacity 
-                style={styles.readFullButton}
+                style={[styles.readFullButton, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
                 onPress={() => Linking.openURL(article.url)}
               >
-                <Text style={styles.readFullText}>Read Full Article</Text>
-                <Ionicons name="open-outline" size={18} color="#007AFF" style={styles.readFullIcon} />
+                <Text style={[styles.readFullText, { color: colors.accent }]}>Read Full Article</Text>
+                <Ionicons name="open-outline" size={18} color={colors.accent} style={styles.readFullIcon} />
               </TouchableOpacity>
             </View>
 
             {/* Tags */}
-            <View style={styles.tagsContainer}>
-              <Text style={styles.tagsTitle}>Related Topics</Text>
+            <View style={[styles.tagsContainer, { borderTopColor: colors.border }]}>
+              <Text style={[styles.tagsTitle, { color: colors.primary }]}>Related Topics</Text>
               <View style={styles.tags}>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>Cryptocurrency</Text>
+                <View style={[styles.tag, { backgroundColor: colors.accent }]}>
+                  <Text style={styles.tagText}>Apple</Text>
                 </View>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>Blockchain</Text>
+                <View style={[styles.tag, { backgroundColor: colors.accent }]}>
+                  <Text style={styles.tagText}>Technology</Text>
                 </View>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>Finance</Text>
+                <View style={[styles.tag, { backgroundColor: colors.accent }]}>
+                  <Text style={styles.tagText}>Innovation</Text>
                 </View>
               </View>
             </View>
@@ -266,8 +275,8 @@ class ArticleDetailScreen extends Component {
   }
 }
 
-// Main Home Screen Component
-export default class HomeScreen extends Component {
+// Main Apple Screen Component
+class AppleScreen extends Component {
   state = {
     articles: [],
     isLoading: true,
@@ -360,9 +369,11 @@ export default class HomeScreen extends Component {
   };
 
   renderCarouselItem = ({ item, index }) => {
+    const { colors } = this.props.theme;
+    
     return (
       <TouchableOpacity
-        style={styles.carouselCard}
+        style={[styles.carouselCard, { backgroundColor: colors.cardBackground }]}
         onPress={() => this.openArticle(item)}
         activeOpacity={0.95}
       >
@@ -372,7 +383,7 @@ export default class HomeScreen extends Component {
           resizeMode="cover"
         />
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)']}
+          colors={colors.carouselGradient || ['transparent', 'rgba(0,0,0,0.8)']}
           style={styles.carouselGradient}
         >
           <View style={styles.carouselContent}>
@@ -390,6 +401,7 @@ export default class HomeScreen extends Component {
   };
 
   renderCarouselIndicators = () => {
+    const { colors } = this.props.theme;
     const featuredArticles = this.state.articles.slice(0, 5);
     
     return (
@@ -399,7 +411,9 @@ export default class HomeScreen extends Component {
             key={index}
             style={[
               styles.indicator,
-              index === this.state.activeCarouselIndex ? styles.activeIndicator : {}
+              { backgroundColor: colors.border },
+              index === this.state.activeCarouselIndex ? 
+                [styles.activeIndicator, { backgroundColor: colors.accent }] : {}
             ]}
           />
         ))}
@@ -408,23 +422,28 @@ export default class HomeScreen extends Component {
   };
 
   renderRegularArticle = (article, index) => {
+    const { colors } = this.props.theme;
+    
     return (
       <TouchableOpacity
         key={article.url + '_' + index}
-        style={styles.articleCard}
+        style={[styles.articleCard, { 
+          backgroundColor: colors.cardBackground,
+          borderBottomColor: colors.border 
+        }]}
         onPress={() => this.openArticle(article)}
         activeOpacity={0.7}
       >
         <View style={styles.articleContent}>
           <View style={styles.articleTextContainer}>
             <View style={styles.articleMeta}>
-              <Text style={styles.articleSource}>{article.source}</Text>
-              <Text style={styles.articleDate}>{this.formatDate(article.date)}</Text>
+              <Text style={[styles.articleSource, { color: colors.accent }]}>{article.source}</Text>
+              <Text style={[styles.articleDate, { color: colors.secondary }]}>{this.formatDate(article.date)}</Text>
             </View>
-            <Text style={styles.articleTitle} numberOfLines={3}>
+            <Text style={[styles.articleTitle, { color: colors.primary }]} numberOfLines={3}>
               {article.title}
             </Text>
-            <Text style={styles.articleDescription} numberOfLines={2}>
+            <Text style={[styles.articleDescription, { color: colors.secondary }]} numberOfLines={2}>
               {article.description}
             </Text>
           </View>
@@ -442,15 +461,16 @@ export default class HomeScreen extends Component {
 
   render() {
     const { isLoading, articles, refreshing, error, showDetail, selectedArticle } = this.state;
+    const { colors, isDarkMode, toggleTheme } = this.props.theme;
 
     if (error) {
       return (
-        <SafeAreaView style={styles.container}>
-          <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+          <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
           <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle-outline" size={60} color="#ff6b6b" />
-            <Text style={styles.errorText}>Failed to load news</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={this.getArticles}>
+            <Ionicons name="alert-circle-outline" size={60} color={colors.error} />
+            <Text style={[styles.errorText, { color: colors.primary }]}>Failed to load news</Text>
+            <TouchableOpacity style={[styles.retryButton, { backgroundColor: colors.accent }]} onPress={this.getArticles}>
               <Text style={styles.retryText}>Try Again</Text>
             </TouchableOpacity>
           </View>
@@ -462,45 +482,45 @@ export default class HomeScreen extends Component {
     const regularArticles = articles.slice(5);
 
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
         
         {/* Updated Header with Left-aligned text and Right-aligned Drawer Button */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.background }]}>
           <View style={styles.headerContent}>
             <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>Apple News</Text>
-              <Text style={styles.headerSubtitle}>Stay updated with the latest</Text>
+              <Text style={[styles.headerTitle, { color: colors.primary }]}>Apple News</Text>
+              <Text style={[styles.headerSubtitle, { color: colors.secondary }]}>Stay updated with the latest</Text>
             </View>
             <TouchableOpacity 
-              style={styles.drawerButton} 
+              style={[styles.drawerButton, { backgroundColor: colors.cardBackground }]} 
               onPress={this.openDrawer}
             >
-              <Ionicons name="menu-outline" size={28} color="#1c1c1e" />
+              <Ionicons name="menu-outline" size={28} color={colors.primary} />
             </TouchableOpacity>
           </View>
         </View>
 
         {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={styles.loadingText}>Loading latest news...</Text>
+          <View style={[styles.loadingContainer, { backgroundColor: colors.loading }]}>
+            <ActivityIndicator size="large" color={colors.accent} />
+            <Text style={[styles.loadingText, { color: colors.secondary }]}>Loading latest news...</Text>
           </View>
         ) : (
           <ScrollView
-            style={styles.scrollView}
+            style={[styles.scrollView, { backgroundColor: colors.background }]}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={this.onRefresh}
-                tintColor="#007AFF"
+                tintColor={colors.accent}
               />
             }
           >
             {featuredArticles.length > 0 && (
               <>
-                <Text style={styles.carouselHeader}>Featured Stories</Text>
+                <Text style={[styles.carouselHeader, { color: colors.primary }]}>Featured Stories</Text>
                 <FlatList
                   data={featuredArticles}
                   renderItem={this.renderCarouselItem}
@@ -518,8 +538,11 @@ export default class HomeScreen extends Component {
               </>
             )}
             
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>More Stories</Text>
+            <View style={[styles.sectionHeader, { 
+              backgroundColor: colors.sectionBackground,
+              borderBottomColor: colors.border 
+            }]}>
+              <Text style={[styles.sectionTitle, { color: colors.primary }]}>More Stories</Text>
             </View>
             
             {regularArticles.map((article, index) => 
@@ -535,6 +558,7 @@ export default class HomeScreen extends Component {
           <ArticleDetailScreen
             article={selectedArticle}
             onBack={this.closeArticle}
+            theme={this.props.theme}
           />
         )}
       </SafeAreaView>
@@ -545,7 +569,6 @@ export default class HomeScreen extends Component {
 const styles = {
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   header: {
     paddingHorizontal: 20,
@@ -563,18 +586,15 @@ const styles = {
   headerTitle: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#1c1c1e',
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#8e8e93',
     marginTop: 2,
   },
   drawerButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#f2f2f7',
   },
   scrollView: {
     flex: 1,
@@ -583,12 +603,10 @@ const styles = {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f2f2f7',
   },
   loadingText: {
     marginTop: 15,
     fontSize: 16,
-    color: '#8e8e93',
   },
   errorContainer: {
     flex: 1,
@@ -598,12 +616,10 @@ const styles = {
   },
   errorText: {
     fontSize: 18,
-    color: '#1c1c1e',
     marginTop: 15,
     marginBottom: 25,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
@@ -618,7 +634,6 @@ const styles = {
   carouselHeader: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#1c1c1e',
     paddingHorizontal: 20,
     marginBottom: 15,
   },
@@ -688,11 +703,9 @@ const styles = {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#d1d1d6',
     marginHorizontal: 4,
   },
   activeIndicator: {
-    backgroundColor: '#007AFF',
     width: 24,
     borderRadius: 4,
   },
@@ -701,20 +714,15 @@ const styles = {
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f7',
-    backgroundColor: '#fff',
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1c1c1e',
   },
   articleCard: {
-    backgroundColor: '#fff',
     marginHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f7',
   },
   articleContent: {
     flexDirection: 'row',
@@ -731,24 +739,20 @@ const styles = {
   articleSource: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#007AFF',
     textTransform: 'uppercase',
   },
   articleDate: {
     fontSize: 12,
-    color: '#8e8e93',
     marginLeft: 8,
   },
   articleTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#1c1c1e',
     lineHeight: 23,
     marginBottom: 8,
   },
   articleDescription: {
     fontSize: 15,
-    color: '#636366',
     lineHeight: 20,
   },
   articleImageContainer: {
@@ -770,7 +774,6 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#fff',
     zIndex: 1000,
   },
   detailHeader: {
@@ -835,7 +838,6 @@ const styles = {
     alignItems: 'center',
   },
   detailContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     marginTop: -25,
@@ -854,7 +856,6 @@ const styles = {
   detailSource: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#007AFF',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -862,28 +863,23 @@ const styles = {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#8e8e93',
     marginHorizontal: 8,
   },
   detailDate: {
     fontSize: 14,
-    color: '#8e8e93',
   },
   detailAuthor: {
     fontSize: 15,
-    color: '#636366',
     fontStyle: 'italic',
   },
   detailTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1c1c1e',
     lineHeight: 36,
     marginBottom: 15,
   },
   detailDescription: {
     fontSize: 18,
-    color: '#636366',
     lineHeight: 26,
     marginBottom: 25,
     fontWeight: '500',
@@ -893,7 +889,6 @@ const styles = {
   },
   bodyText: {
     fontSize: 17,
-    color: '#1c1c1e',
     lineHeight: 26,
     marginBottom: 20,
   },
@@ -901,16 +896,15 @@ const styles = {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f2f2f7',
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 12,
     marginTop: 10,
+    borderWidth: 1,
   },
   readFullText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#007AFF',
   },
   readFullIcon: {
     marginLeft: 8,
@@ -919,12 +913,10 @@ const styles = {
     marginTop: 20,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: '#f2f2f7',
   },
   tagsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1c1c1e',
     marginBottom: 12,
   },
   tags: {
@@ -932,7 +924,6 @@ const styles = {
     flexWrap: 'wrap',
   },
   tag: {
-    backgroundColor: '#007AFF',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -945,3 +936,5 @@ const styles = {
     fontWeight: '500',
   },
 };
+
+export default AppleScreenWrapper;

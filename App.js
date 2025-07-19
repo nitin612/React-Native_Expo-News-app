@@ -1,21 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import RootStack from "./src/Routes/Navigation"
+import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider } from './src/utils/ThemeContext';
 import DrawerNavigator from './src/drawer/Drawer';
-
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <DrawerNavigator/>
-    </NavigationContainer>
+    <ThemeProvider>
+      <NavigationContainer>
+        <DrawerNavigator />
+      </NavigationContainer>
+    </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});

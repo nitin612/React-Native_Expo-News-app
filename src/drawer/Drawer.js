@@ -2,6 +2,7 @@ import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../utils/ThemeContext';
 
 // Import your screens
 import AppNavigator from '../Routes/Navigation'; // Your existing stack navigator
@@ -17,6 +18,7 @@ const Drawer = createDrawerNavigator();
 // Custom Drawer Content
 const CustomDrawerContent = (props) => {
   const { navigation } = props;
+  const { colors, isDarkMode, toggleTheme } = useTheme();
   
   const menuItems = [
     { name: 'Home', icon: 'home-outline', screen: 'HomeStack' },
@@ -29,40 +31,82 @@ const CustomDrawerContent = (props) => {
   ];
 
   return (
-    <View style={styles.drawerContainer}>
-      <View style={styles.drawerHeader}>
-        <Text style={styles.drawerTitle}>News Categories</Text>
-        <Text style={styles.drawerSubtitle}>Choose your interest</Text>
+    <View style={[styles.drawerContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles.drawerHeader, { 
+        backgroundColor: colors.cardBackground,
+        borderBottomColor: colors.border 
+      }]}>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={[styles.drawerTitle, { color: colors.primary }]}>
+              News Categories
+            </Text>
+            <Text style={[styles.drawerSubtitle, { color: colors.secondary }]}>
+              Choose your interest
+            </Text>
+          </View>
+          
+          {/* Theme Toggle Button */}
+          <TouchableOpacity
+            style={[styles.themeToggle, { backgroundColor: colors.border }]}
+            onPress={toggleTheme}
+          >
+            <Ionicons 
+              name={isDarkMode ? "sunny" : "moon"} 
+              size={20} 
+              color={colors.primary} 
+            />
+          </TouchableOpacity>
+        </View>
       </View>
       
       <View style={styles.menuContainer}>
         {menuItems.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={styles.menuItem}
+            style={[styles.menuItem, { borderBottomColor: colors.border }]}
             onPress={() => navigation.navigate(item.screen)}
           >
-            <Ionicons name={item.icon} size={24} color="#007AFF" />
-            <Text style={styles.menuText}>{item.name}</Text>
+            <Ionicons name={item.icon} size={24} color={colors.accent} />
+            <Text style={[styles.menuText, { color: colors.primary }]}>
+              {item.name}
+            </Text>
           </TouchableOpacity>
         ))}
+      </View>
+      
+      {/* Footer */}
+      <View style={[styles.drawerFooter, { borderTopColor: colors.border }]}>
+        <Text style={[styles.footerText, { color: colors.secondary }]}>
+          {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+        </Text>
       </View>
     </View>
   );
 };
 
+// Wrapper components for screens to pass theme
+const ThemedScreen = (ScreenComponent) => {
+  return (props) => {
+    const theme = useTheme();
+    return <ScreenComponent {...props} theme={theme} />;
+  };
+};
+
 export default function DrawerNavigator() {
+  const { colors } = useTheme();
+  
   return (
     <Drawer.Navigator
       initialRouteName="HomeStack"
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: colors.background,
           width: 280,
         },
-        drawerActiveTintColor: '#007AFF',
-        drawerInactiveTintColor: '#8e8e93',
+        drawerActiveTintColor: colors.accent,
+        drawerInactiveTintColor: colors.secondary,
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
@@ -77,10 +121,10 @@ export default function DrawerNavigator() {
         }}
       />
       
-      {/* Other category screens */}
+      {/* Other category screens with theme support */}
       <Drawer.Screen 
         name="Cryptocurrency" 
-        component={CryptoCurrencyScreen}
+        component={ThemedScreen(CryptoCurrencyScreen)}
         options={{
           drawerIcon: ({ color }) => (
             <Ionicons name="logo-bitcoin" size={24} color={color} />
@@ -89,7 +133,7 @@ export default function DrawerNavigator() {
       />
       <Drawer.Screen 
         name="Apple" 
-        component={AppleScreen}
+        component={ThemedScreen(AppleScreen)}
         options={{
           drawerIcon: ({ color }) => (
             <Ionicons name="logo-apple" size={24} color={color} />
@@ -98,7 +142,7 @@ export default function DrawerNavigator() {
       />
       <Drawer.Screen 
         name="Business" 
-        component={BusinessScreen}
+        component={ThemedScreen(BusinessScreen)}
         options={{
           drawerIcon: ({ color }) => (
             <Ionicons name="business-outline" size={24} color={color} />
@@ -107,7 +151,7 @@ export default function DrawerNavigator() {
       />
       <Drawer.Screen 
         name="Tech" 
-        component={TechScreen}
+        component={ThemedScreen(TechScreen)}
         options={{
           drawerIcon: ({ color }) => (
             <Ionicons name="hardware-chip-outline" size={24} color={color} />
@@ -116,7 +160,7 @@ export default function DrawerNavigator() {
       />
       <Drawer.Screen 
         name="Tesla" 
-        component={TeslaScreen}
+        component={ThemedScreen(TeslaScreen)}
         options={{
           drawerIcon: ({ color }) => (
             <Ionicons name="car-outline" size={24} color={color} />
@@ -125,7 +169,7 @@ export default function DrawerNavigator() {
       />
       <Drawer.Screen 
         name="WallStreet" 
-        component={WallStreetScreen}
+        component={ThemedScreen(WallStreetScreen)}
         options={{
           drawerIcon: ({ color }) => (
             <Ionicons name="trending-up-outline" size={24} color={color} />
@@ -139,27 +183,35 @@ export default function DrawerNavigator() {
 const styles = StyleSheet.create({
   drawerContainer: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   drawerHeader: {
-    backgroundColor: '#f8f9fa',
     paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   drawerTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1c1c1e',
     marginBottom: 5,
   },
   drawerSubtitle: {
     fontSize: 16,
-    color: '#8e8e93',
+  },
+  themeToggle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   menuContainer: {
+    flex: 1,
     paddingTop: 20,
   },
   menuItem: {
@@ -168,12 +220,20 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f7',
   },
   menuText: {
     fontSize: 16,
-    color: '#1c1c1e',
     marginLeft: 15,
+    fontWeight: '500',
+  },
+  drawerFooter: {
+    borderTopWidth: 1,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+  footerText: {
+    fontSize: 14,
+    textAlign: 'center',
     fontWeight: '500',
   },
 });

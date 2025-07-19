@@ -18,8 +18,16 @@ import {
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../utils/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
+
+// Wrapper component to use hooks
+const AppleScreenWrapper = (props) => {
+  const theme = useTheme();
+  return <AppleScreen {...props} theme={theme} />;
+};
+
 
 // Article Detail Screen Component
 class ArticleDetailScreen extends Component {

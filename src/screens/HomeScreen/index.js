@@ -10,15 +10,23 @@ import {
   ActivityIndicator,
   RefreshControl,
   FlatList,
+  StatusBar,
 } from 'react-native';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import CustomHeader from '../../utils/CustomHeader'; // Adjust path as needed
+import CustomHeader from '../../utils/CustomHeader';
+import { useTheme } from '../../utils/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
-export default class HomeScreen extends Component {
+// Wrapper component to use hooks
+const HomeScreenWrapper = (props) => {
+  const theme = useTheme();
+  return <HomeScreen {...props} theme={theme} />;
+};
+
+class HomeScreen extends Component {
   state = {
     articles: [],
     isLoading: true,
@@ -91,9 +99,11 @@ export default class HomeScreen extends Component {
   };
 
   renderCarouselItem = ({ item, index }) => {
+    const { colors } = this.props.theme;
+    
     return (
       <TouchableOpacity
-        style={styles.carouselCard}
+        style={[styles.carouselCard, { backgroundColor: colors.cardBackground }]}
         onPress={() => this.openArticle(item)}
         activeOpacity={0.95}
       >
@@ -103,7 +113,7 @@ export default class HomeScreen extends Component {
           resizeMode="cover"
         />
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)']}
+          colors={colors.carouselGradient}
           style={styles.carouselGradient}
         >
           <View style={styles.carouselContent}>
@@ -121,6 +131,7 @@ export default class HomeScreen extends Component {
   };
 
   renderCarouselIndicators = () => {
+    const { colors } = this.props.theme;
     const featuredArticles = this.state.articles.slice(0, 5);
     
     return (
@@ -130,7 +141,9 @@ export default class HomeScreen extends Component {
             key={index}
             style={[
               styles.indicator,
-              index === this.state.activeCarouselIndex ? styles.activeIndicator : {}
+              { backgroundColor: colors.border },
+              index === this.state.activeCarouselIndex ? 
+                [styles.activeIndicator, { backgroundColor: colors.accent }] : {}
             ]}
           />
         ))}
@@ -139,23 +152,32 @@ export default class HomeScreen extends Component {
   };
 
   renderRegularArticle = (article, index) => {
+    const { colors } = this.props.theme;
+    
     return (
       <TouchableOpacity
         key={article.url + '_' + index}
-        style={styles.articleCard}
+        style={[styles.articleCard, { 
+          backgroundColor: colors.cardBackground,
+          borderBottomColor: colors.border 
+        }]}
         onPress={() => this.openArticle(article)}
         activeOpacity={0.7}
       >
         <View style={styles.articleContent}>
           <View style={styles.articleTextContainer}>
             <View style={styles.articleMeta}>
-              <Text style={styles.articleSource}>{article.source}</Text>
-              <Text style={styles.articleDate}>{this.formatDate(article.date)}</Text>
+              <Text style={[styles.articleSource, { color: colors.accent }]}>
+                {article.source}
+              </Text>
+              <Text style={[styles.articleDate, { color: colors.secondary }]}>
+                {this.formatDate(article.date)}
+              </Text>
             </View>
-            <Text style={styles.articleTitle} numberOfLines={3}>
+            <Text style={[styles.articleTitle, { color: colors.primary }]} numberOfLines={3}>
               {article.title}
             </Text>
-            <Text style={styles.articleDescription} numberOfLines={2}>
+            <Text style={[styles.articleDescription, { color: colors.secondary }]} numberOfLines={2}>
               {article.description}
             </Text>
           </View>
@@ -173,17 +195,23 @@ export default class HomeScreen extends Component {
 
   render() {
     const { isLoading, articles, refreshing, error } = this.state;
+    const { colors, isDarkMode, toggleTheme } = this.props.theme;
 
     if (error) {
       return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+          <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
           <CustomHeader 
             title="Latest News" 
-            subtitle="Stay updated with the latest" 
+            subtitle="Stay updated with the latest"
+            backgroundColor={colors.background}
+            titleColor={colors.primary}
           />
           <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle-outline" size={60} color="#ff6b6b" />
-            <Text style={styles.errorText}>Failed to load news</Text>
+            <Ionicons name="alert-circle-outline" size={60} color={colors.error} />
+            <Text style={[styles.errorText, { color: colors.primary }]}>
+              Failed to load news
+            </Text>
             <TouchableOpacity style={styles.retryButton} onPress={this.getArticles}>
               <Text style={styles.retryText}>Try Again</Text>
             </TouchableOpacity>
@@ -196,37 +224,48 @@ export default class HomeScreen extends Component {
     const regularArticles = articles.slice(5);
 
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
         <CustomHeader 
           title="Latest News" 
           subtitle="Stay updated with the latest"
+          backgroundColor={colors.background}
+          titleColor={colors.primary}
           rightComponent={
-            <TouchableOpacity style={styles.searchButton}>
-              <Ionicons name="search-outline" size={24} color="#1c1c1e" />
+            <TouchableOpacity style={styles.searchButton} onPress={toggleTheme}>
+              <Ionicons 
+                name={isDarkMode ? "sunny" : "moon"} 
+                size={24} 
+                color={colors.primary} 
+              />
             </TouchableOpacity>
           }
         />
 
         {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={styles.loadingText}>Loading latest news...</Text>
+          <View style={[styles.loadingContainer, { backgroundColor: colors.loading }]}>
+            <ActivityIndicator size="large" color={colors.accent} />
+            <Text style={[styles.loadingText, { color: colors.secondary }]}>
+              Loading latest news...
+            </Text>
           </View>
         ) : (
           <ScrollView
-            style={styles.scrollView}
+            style={[styles.scrollView, { backgroundColor: colors.background }]}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={this.onRefresh}
-                tintColor="#007AFF"
+                tintColor={colors.accent}
               />
             }
           >
             {featuredArticles.length > 0 && (
               <>
-                <Text style={styles.carouselHeader}>Featured Stories</Text>
+                <Text style={[styles.carouselHeader, { color: colors.primary }]}>
+                  Featured Stories
+                </Text>
                 <FlatList
                   data={featuredArticles}
                   renderItem={this.renderCarouselItem}
@@ -244,8 +283,13 @@ export default class HomeScreen extends Component {
               </>
             )}
             
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>More Stories</Text>
+            <View style={[styles.sectionHeader, { 
+              backgroundColor: colors.sectionBackground,
+              borderBottomColor: colors.border 
+            }]}>
+              <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+                More Stories
+              </Text>
             </View>
             
             {regularArticles.map((article, index) => 
@@ -263,7 +307,6 @@ export default class HomeScreen extends Component {
 const styles = {
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   searchButton: {
     padding: 8,
@@ -276,12 +319,10 @@ const styles = {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f2f2f7',
   },
   loadingText: {
     marginTop: 15,
     fontSize: 16,
-    color: '#8e8e93',
   },
   errorContainer: {
     flex: 1,
@@ -291,7 +332,6 @@ const styles = {
   },
   errorText: {
     fontSize: 18,
-    color: '#1c1c1e',
     marginTop: 15,
     marginBottom: 25,
   },
@@ -311,7 +351,6 @@ const styles = {
   carouselHeader: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#1c1c1e',
     paddingHorizontal: 20,
     marginBottom: 15,
     marginTop: 10,
@@ -382,11 +421,9 @@ const styles = {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#d1d1d6',
     marginHorizontal: 4,
   },
   activeIndicator: {
-    backgroundColor: '#007AFF',
     width: 24,
     borderRadius: 4,
   },
@@ -395,20 +432,15 @@ const styles = {
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f7',
-    backgroundColor: '#fff',
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1c1c1e',
   },
   articleCard: {
-    backgroundColor: '#fff',
     marginHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f7',
   },
   articleContent: {
     flexDirection: 'row',
@@ -425,24 +457,20 @@ const styles = {
   articleSource: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#007AFF',
     textTransform: 'uppercase',
   },
   articleDate: {
     fontSize: 12,
-    color: '#8e8e93',
     marginLeft: 8,
   },
   articleTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#1c1c1e',
     lineHeight: 23,
     marginBottom: 8,
   },
   articleDescription: {
     fontSize: 15,
-    color: '#636366',
     lineHeight: 20,
   },
   articleImageContainer: {
@@ -457,3 +485,5 @@ const styles = {
     height: 30,
   },
 };
+
+export default HomeScreenWrapper;
