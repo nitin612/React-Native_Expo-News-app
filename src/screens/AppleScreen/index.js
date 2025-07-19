@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   StatusBar,
   Dimensions,
-  ActivityIndicator,
   RefreshControl,
   FlatList,
   Share,
@@ -22,13 +21,151 @@ import { useTheme } from '../../utils/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
 
+// Shimmer Component
+class ShimmerView extends Component {
+  constructor(props) {
+    super(props);
+    this.animatedValue = new Animated.Value(0);
+  }
+
+  componentDidMount() {
+    this.startAnimation();
+  }
+
+  startAnimation = () => {
+    this.animatedValue.setValue(0);
+    Animated.timing(this.animatedValue, {
+      toValue: 1,
+      duration: 1500,
+      useNativeDriver: true,
+    }).start(() => {
+      this.startAnimation();
+    });
+  };
+
+  render() {
+    const { style, colors } = this.props;
+    
+    const translateX = this.animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [-width, width],
+    });
+
+    const shimmerColors = colors?.isDarkMode 
+      ? ['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']
+      : ['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.05)'];
+
+    return (
+      <View style={[{
+        backgroundColor: colors?.shimmerBase || (colors?.isDarkMode ? '#2a2a2a' : '#f0f0f0'),
+        overflow: 'hidden',
+        borderRadius: 8,
+      }, style]}>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            transform: [{ translateX }],
+          }}
+        >
+          <LinearGradient
+            colors={shimmerColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              flex: 1,
+              width: width * 0.7,
+            }}
+          />
+        </Animated.View>
+      </View>
+    );
+  }
+}
+
+// Shimmer Loading Components
+const CarouselShimmer = ({ colors }) => (
+  <View style={styles.carouselContainer}>
+    <ShimmerView 
+      style={[styles.carouselCard, { marginRight: 15 }]} 
+      colors={colors} 
+    />
+  </View>
+);
+
+const CarouselIndicatorShimmer = ({ colors }) => (
+  <View style={styles.indicatorContainer}>
+    {[1, 2, 3, 4, 5].map((_, index) => (
+      <ShimmerView
+        key={index}
+        style={[styles.indicator, { marginHorizontal: 4 }]}
+        colors={colors}
+      />
+    ))}
+  </View>
+);
+
+const ArticleShimmer = ({ colors }) => (
+  <View style={[styles.articleCard, { 
+    backgroundColor: colors.cardBackground,
+    borderBottomColor: colors.border 
+  }]}>
+    <View style={styles.articleContent}>
+      <View style={styles.articleTextContainer}>
+        {/* Meta shimmer */}
+        <View style={styles.articleMeta}>
+          <ShimmerView style={{ width: 80, height: 12 }} colors={colors} />
+          <ShimmerView style={{ width: 60, height: 12, marginLeft: 8 }} colors={colors} />
+        </View>
+        
+        {/* Title shimmer - 3 lines */}
+        <ShimmerView style={{ width: '100%', height: 17, marginBottom: 6 }} colors={colors} />
+        <ShimmerView style={{ width: '85%', height: 17, marginBottom: 6 }} colors={colors} />
+        <ShimmerView style={{ width: '70%', height: 17, marginBottom: 8 }} colors={colors} />
+        
+        {/* Description shimmer - 2 lines */}
+        <ShimmerView style={{ width: '100%', height: 15, marginBottom: 4 }} colors={colors} />
+        <ShimmerView style={{ width: '60%', height: 15 }} colors={colors} />
+      </View>
+      
+      <View style={styles.articleImageContainer}>
+        <ShimmerView style={styles.articleImage} colors={colors} />
+      </View>
+    </View>
+  </View>
+);
+
+const HeaderShimmer = ({ colors }) => (
+  <View style={[styles.header, { backgroundColor: colors.background }]}>
+    <View style={styles.headerContent}>
+      <View style={styles.headerTextContainer}>
+        <ShimmerView style={{ width: 150, height: 32, marginBottom: 4 }} colors={colors} />
+        <ShimmerView style={{ width: 200, height: 16 }} colors={colors} />
+      </View>
+      <ShimmerView style={{ width: 44, height: 44, borderRadius: 8 }} colors={colors} />
+    </View>
+  </View>
+);
+
+const SectionHeaderShimmer = ({ colors }) => (
+  <View style={[styles.sectionHeader, { 
+    backgroundColor: colors.sectionBackground,
+    borderBottomColor: colors.border 
+  }]}>
+    <ShimmerView style={{ width: 120, height: 20 }} colors={colors} />
+  </View>
+);
+
 // Wrapper component to use hooks
 const AppleScreenWrapper = (props) => {
   const theme = useTheme();
   return <AppleScreen {...props} theme={theme} />;
 };
 
-// Article Detail Screen Component
+// Article Detail Screen Component (unchanged)
 class ArticleDetailScreen extends Component {
   constructor(props) {
     super(props);
@@ -459,6 +596,36 @@ class AppleScreen extends Component {
     );
   };
 
+  renderShimmerLoading = () => {
+    const { colors } = this.props.theme;
+    
+    return (
+      <ScrollView
+        style={[styles.scrollView, { backgroundColor: colors.background }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Shimmer */}
+        <View style={styles.carouselHeaderContainer}>
+          <ShimmerView style={{ width: 140, height: 22, marginHorizontal: 20, marginBottom: 15 }} colors={colors} />
+        </View>
+
+        {/* Carousel Shimmer */}
+        <CarouselShimmer colors={colors} />
+        <CarouselIndicatorShimmer colors={colors} />
+        
+        {/* Section Header Shimmer */}
+        <SectionHeaderShimmer colors={colors} />
+        
+        {/* Article Shimmers */}
+        {[1, 2, 3, 4, 5, 6].map((_, index) => (
+          <ArticleShimmer key={index} colors={colors} />
+        ))}
+        
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    );
+  };
+
   render() {
     const { isLoading, articles, refreshing, error, showDetail, selectedArticle } = this.state;
     const { colors, isDarkMode, toggleTheme } = this.props.theme;
@@ -485,27 +652,28 @@ class AppleScreen extends Component {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
         
-        {/* Updated Header with Left-aligned text and Right-aligned Drawer Button */}
-        <View style={[styles.header, { backgroundColor: colors.background }]}>
-          <View style={styles.headerContent}>
-            <View style={styles.headerTextContainer}>
-              <Text style={[styles.headerTitle, { color: colors.primary }]}>Apple News</Text>
-              <Text style={[styles.headerSubtitle, { color: colors.secondary }]}>Stay updated with the latest</Text>
+        {/* Header */}
+        {isLoading ? (
+          <HeaderShimmer colors={colors} />
+        ) : (
+          <View style={[styles.header, { backgroundColor: colors.background }]}>
+            <View style={styles.headerContent}>
+              <View style={styles.headerTextContainer}>
+                <Text style={[styles.headerTitle, { color: colors.primary }]}>Apple News</Text>
+                <Text style={[styles.headerSubtitle, { color: colors.secondary }]}>Stay updated with the latest</Text>
+              </View>
+              <TouchableOpacity 
+                style={[styles.drawerButton, { backgroundColor: colors.cardBackground }]} 
+                onPress={this.openDrawer}
+              >
+                <Ionicons name="menu-outline" size={28} color={colors.primary} />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity 
-              style={[styles.drawerButton, { backgroundColor: colors.cardBackground }]} 
-              onPress={this.openDrawer}
-            >
-              <Ionicons name="menu-outline" size={28} color={colors.primary} />
-            </TouchableOpacity>
           </View>
-        </View>
+        )}
 
         {isLoading ? (
-          <View style={[styles.loadingContainer, { backgroundColor: colors.loading }]}>
-            <ActivityIndicator size="large" color={colors.accent} />
-            <Text style={[styles.loadingText, { color: colors.secondary }]}>Loading latest news...</Text>
-          </View>
+          this.renderShimmerLoading()
         ) : (
           <ScrollView
             style={[styles.scrollView, { backgroundColor: colors.background }]}
@@ -599,15 +767,6 @@ const styles = {
   scrollView: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 15,
-    fontSize: 16,
-  },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -631,6 +790,9 @@ const styles = {
   },
 
   // Carousel Styles
+  carouselHeaderContainer: {
+    marginBottom: 0,
+  },
   carouselHeader: {
     fontSize: 22,
     fontWeight: '600',
@@ -712,7 +874,7 @@ const styles = {
 
   sectionHeader: {
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 15, 
     borderBottomWidth: 1,
   },
   sectionTitle: {
