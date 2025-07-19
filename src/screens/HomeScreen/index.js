@@ -202,7 +202,7 @@ class HomeScreen extends Component {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
           <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
           <CustomHeader 
-            title="Latest News" 
+            title="NewsHub" 
             subtitle="Stay updated with the latest"
             backgroundColor={colors.background}
             titleColor={colors.primary}
@@ -227,7 +227,7 @@ class HomeScreen extends Component {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
         <CustomHeader 
-          title="Latest News" 
+          title="NewsHub" 
           subtitle="Stay updated with the latest"
           backgroundColor={colors.background}
           titleColor={colors.primary}

@@ -427,7 +427,7 @@ class AppleScreen extends Component {
   getArticles = () => {
     axios
       .get(
-        "https://newsapi.org/v2/everything?q=apple&from=2025-07-18&to=2025-07-18&sortBy=popularity&apiKey=42f96ae7332147268cf9d2507b5681f2"
+        `https://newsapi.org/v2/everything?q=apple&from=2025-07-18&to=2025-07-18&sortBy=popularity&apiKey=42f96ae7332147268cf9d2507b5681f2`
       )
       .then(response =>
         response.data.articles.map(article => ({
